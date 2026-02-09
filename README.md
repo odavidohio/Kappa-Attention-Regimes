@@ -1,4 +1,4 @@
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18529821.svg)](https://doi.org/10.5281/zenodo.18529821)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Paper](https://img.shields.io/badge/Paper-PDF-red)](./papers/PAPER_KAPPA_LLM_EN.md)
@@ -239,8 +239,20 @@ Kappa-LLM does not claim to eliminate hallucinations. The framework focuses on:
 **What We Don't Do:** Verify factual correctness or eliminate all hallucinations
 
 ---
+## 📚 Citation
 
+If you use this work, please cite:
 
+```bibtex
+@software{ohio2026kappa_llm,
+  author       = {Ohio, David},
+  title        = {Kappa-LLM: Multi-Observable Structural Detection and Real-Time Mitigation of Hallucinations in Large Language Models},
+  year         = {2026},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.18529821},
+  url          = {https://doi.org/10.5281/zenodo.18529821}
+}
+```
 
 ---
 
