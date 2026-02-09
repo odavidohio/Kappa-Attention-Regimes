@@ -12,7 +12,7 @@
 Official implementation of **"Kappa-LLM: Multi-Observable Structural Detection and Real-Time Mitigation of Hallucinations in Large Language Models"** using topology-aware observables
 
 <p align="center">
-  <img src="./papers/figures/kappa_framework_overview.png" alt="Kappa-LLM Framework" width="800"/>
+  <img src="./figures/kappa_framework_overview.png" alt="Kappa-LLM Framework" width="800"/>
 </p>
 
 ---
