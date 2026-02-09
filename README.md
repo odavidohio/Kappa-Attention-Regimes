@@ -109,6 +109,13 @@ else:
 - 📄 [English Paper](./papers/PAPER_KAPPA_LLM_EN.md) - Full methodological description
 - 📄 [Portuguese Paper](./papers/PAPER_KAPPA_LLM_PT.md) - Versão completa em português
 
+
+## 🔗 **Related Work**
+
+- **Kappa-Method** — Theoretical foundation of the Kappa framework, defining
+  the canonical observables (Ω, Φ, η, Ξ, Δ) and regime analysis used in this work.  
+  https://github.com/odavidohio/Kappa-Method
+
 ### **Examples**
 
 - 💡 [Basic Usage](./examples/basic_usage.py)
