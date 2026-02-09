@@ -33,4 +33,9 @@ keywords:
   - hallucination detection
   - attention dynamics
   - structural risk
+
+references:
+  - title: "Kappa Method"
+    url: "https://github.com/odavidohio/Kappa-Method"
+
   - kappa method
