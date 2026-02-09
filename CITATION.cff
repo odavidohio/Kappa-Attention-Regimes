@@ -1,17 +1,33 @@
 cff-version: 1.2.0
-message: "If you use this software or the Kappa Method in your research, please cite it as below."
+
+message: >
+  If you use this software or the Kappa Method in your research,
+  please cite it as below.
+
+title: >
+  Kappa-LLM: Multi-Observable Structural Detection and Real-Time
+  Mitigation of Hallucinations in Large Language Models
+
 authors:
   - family-names: Ohio
     given-names: David
-title: "Kappa-LLM: Multi-Observable Structural Detection and Real-Time Mitigation of Hallucinations in Large Language Models"
-version: 0.1.0
+
+version: 0.1.1
 date-released: 2026-02-08
-license: CC-BY-4.0
+year: 2026
+
+doi: 10.5281/zenodo.18529821
+url: https://doi.org/10.5281/zenodo.18529821
+
 repository-code: https://github.com/odavidohio/Kappa-Attention-Regimes
+publisher: Zenodo
+license: CC-BY-4.0
+
 abstract: >
   Empirical application of the Kappa Method to attention dynamics in large
   language models, enabling structural hallucination detection and
   real-time mitigation through multi-observable monitoring.
+
 keywords:
   - large language models
   - hallucination detection
