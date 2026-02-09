@@ -1,0 +1,201 @@
+"""
+Tests for Kappa-LLM observables module.
+
+Tests verify that observables are computed correctly for known cases:
+- Uniform attention should have high Ω, low η, high Ξ
+- Concentrated attention should have low Ω, high η, low Ξ
+- All observables should be in valid ranges
+"""
+
+import pytest
+import numpy as np
+import sys
+import os
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from kappa_llm.observables import KappaObservables, compute_kappa_observables
+
+
+class TestKappaObservables:
+    """Test suite for KappaObservables class."""
+
+    def test_uniform_attention(self):
+        """Uniform attention should have high entropy, low rigidity, high diversity."""
+        n = 64
+        A = np.ones((n, n)) / (n**2)
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        assert obs['omega'] > 0.9, f"Uniform should have high omega (entropy), got {obs['omega']}"
+        assert obs['eta'] < 0.2, f"Uniform should have low eta (rigidity), got {obs['eta']}"
+        assert obs['xi'] > 0.5, f"Uniform should have high xi (diversity), got {obs['xi']}"
+        assert obs['delta'] < 0.1, f"Uniform should have low delta (divergence), got {obs['delta']}"
+
+    def test_concentrated_attention(self):
+        """Concentrated attention should have low entropy, high rigidity, low diversity."""
+        n = 64
+        A = np.zeros((n, n))
+        A[0, 0] = 1.0
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        assert obs['omega'] < 0.1, f"Concentrated should have low omega, got {obs['omega']}"
+        assert obs['eta'] > 0.9, f"Concentrated should have high eta, got {obs['eta']}"
+        assert obs['xi'] < 0.1, f"Concentrated should have low xi, got {obs['xi']}"
+        assert obs['delta'] > 0.5, f"Concentrated should have high delta, got {obs['delta']}"
+
+    def test_diagonal_attention(self):
+        """Diagonal attention (self-attention) should have intermediate values."""
+        n = 64
+        A = np.eye(n)
+        A = A / A.sum()
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        # Diagonal should be between uniform and concentrated
+        assert 0.3 < obs['omega'] < 0.9, f"Diagonal omega unexpected: {obs['omega']}"
+        assert 0.1 < obs['eta'] < 0.7, f"Diagonal eta unexpected: {obs['eta']}"
+
+    def test_observables_in_range(self):
+        """All observables (except rscore) should be in [0, 1]."""
+        n = 64
+        A = np.random.rand(n, n)
+        A = A / A.sum()
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        for key, val in obs.items():
+            if key != 'rscore':  # rscore can be > 1
+                assert 0 <= val <= 1.01, f"{key} out of range: {val}"
+
+    def test_non_negative_attention(self):
+        """Should handle matrices with some negative values by clipping."""
+        n = 32
+        A = np.random.rand(n, n) - 0.3  # Some negative values
+
+        # Should not raise
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        assert obs['omega'] >= 0
+        assert obs['eta'] >= 0
+
+    def test_zero_attention(self):
+        """Should handle all-zero matrix gracefully."""
+        n = 32
+        A = np.zeros((n, n))
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        assert obs['omega'] == 0
+        assert np.isfinite(obs['eta'])
+        assert np.isfinite(obs['xi'])
+
+    def test_compute_bundle(self):
+        """Test ObservableBundle output."""
+        n = 32
+        A = np.random.rand(n, n)
+        A = A / A.sum()
+
+        kappa = KappaObservables(A, use_gudhi=False)
+        bundle = kappa.compute_bundle()
+
+        assert bundle.n_tokens == n
+        assert bundle.matrix_norm > 0
+
+        # Test vector conversion
+        vec = bundle.as_vector()
+        assert len(vec) == 5
+        assert all(np.isfinite(vec))
+
+    def test_compute_all_returns_dict(self):
+        """compute_all should return dictionary with all observables."""
+        n = 32
+        A = np.random.rand(n, n)
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        required_keys = ['omega', 'phi', 'eta', 'xi', 'delta', 'rscore']
+        for key in required_keys:
+            assert key in obs, f"Missing key: {key}"
+
+    def test_eta_gini_alternative(self):
+        """Test alternative eta computation via Gini coefficient."""
+        n = 64
+        A = np.random.rand(n, n)
+        A = A / A.sum()
+
+        kappa = KappaObservables(A, use_gudhi=False)
+        eta_entropy = kappa._compute_eta()
+        eta_gini = kappa._compute_eta_gini()
+
+        # Both should be in [0, 1]
+        assert 0 <= eta_entropy <= 1
+        assert 0 <= eta_gini <= 1
+
+    def test_different_matrix_sizes(self):
+        """Should work with different matrix sizes."""
+        for n in [16, 32, 64, 128]:
+            A = np.random.rand(n, n)
+            A = A / A.sum()
+
+            obs = compute_kappa_observables(A, use_gudhi=False)
+
+            assert all(np.isfinite(v) for v in obs.values())
+
+
+class TestObservablesPhysicalIntuition:
+    """Tests verifying physical intuition about observables."""
+
+    def test_omega_increases_with_uniformity(self):
+        """Omega should increase as attention becomes more uniform."""
+        n = 64
+
+        # Very concentrated
+        A1 = np.zeros((n, n))
+        A1[0, 0] = 1.0
+        obs1 = compute_kappa_observables(A1, use_gudhi=False)
+
+        # Moderately spread
+        A2 = np.zeros((n, n))
+        A2[:10, :10] = 1.0
+        A2 = A2 / A2.sum()
+        obs2 = compute_kappa_observables(A2, use_gudhi=False)
+
+        # Very uniform
+        A3 = np.ones((n, n)) / (n**2)
+        obs3 = compute_kappa_observables(A3, use_gudhi=False)
+
+        assert obs1['omega'] < obs2['omega'] < obs3['omega']
+
+    def test_eta_opposite_of_omega(self):
+        """Eta should be roughly 1 - omega."""
+        n = 64
+        A = np.random.rand(n, n)
+        A = A / A.sum()
+
+        obs = compute_kappa_observables(A, use_gudhi=False)
+
+        # Should be close due to complementary definition
+        assert abs(obs['eta'] + obs['omega'] - 1.0) < 0.01
+
+    def test_xi_increases_with_participation(self):
+        """Xi should increase when more elements participate."""
+        n = 64
+
+        # Few elements participate
+        A1 = np.zeros((n, n))
+        A1[0, 0] = 0.9
+        A1[1, 1] = 0.1
+        obs1 = compute_kappa_observables(A1, use_gudhi=False)
+
+        # Many elements participate
+        A2 = np.ones((n, n)) / (n**2)
+        obs2 = compute_kappa_observables(A2, use_gudhi=False)
+
+        assert obs1['xi'] < obs2['xi']
+
+
+if __name__ == '__main__':
+    pytest.main([__file__, '-v'])
