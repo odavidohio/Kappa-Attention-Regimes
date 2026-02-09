@@ -20,6 +20,9 @@ Official implementation of **"Kappa-LLM: Multi-Observable Structural Detection a
 ## 🎯 **Overview**
 
 Kappa-LLM is a multi-observable framework for detecting and mitigating hallucinations in Large Language Models (LLMs) during generation. Rather than post-hoc fact-checking, we monitor **structural attention dynamics** in real-time and prune unsafe trajectories before semantic failure.
+This repository provides an empirical application of the **Kappa Method**
+(see https://github.com/odavidohio/Kappa-Method) to attention dynamics in large language models.
+
 
 ### **Key Features**
 
